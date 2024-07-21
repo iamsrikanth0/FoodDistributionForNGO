@@ -1,0 +1,106 @@
+import java.util.*;
+
+class Graph {
+    private Map<String, Map<String, Integer>> locations = new HashMap<>();
+
+    public void addLocation(String name) {
+        locations.put(name, new HashMap<>());
+    }
+
+    public void addDistance(String from, String to, int distance) {
+        locations.get(from).put(to, distance);
+        locations.get(to).put(from, distance);
+    }
+
+    public Set<String> getLocations() {
+        return locations.keySet();
+    }
+
+    public Map<String, Integer> getDistancesFrom(String location) {
+        return locations.get(location);
+    }
+}
+
+
+//2. Dijkstra's Algorithm for Route Optimization:**
+
+class Dijkstra {
+    public Map<String, Integer> findShortestPaths(Graph graph, String source) {
+        Map<String, Integer> distances = new HashMap<>();
+        PriorityQueue<String> pq = new PriorityQueue<>(Comparator.comparingInt(distances::get));
+
+        distances.put(source, 0);
+        pq.add(source);
+
+        while (!pq.isEmpty()) {
+            String current = pq.poll();
+            for (Map.Entry<String, Integer> neighborEntry : graph.getDistancesFrom(current).entrySet()) {
+                String neighbor = neighborEntry.getKey();
+                int newDistance = distances.get(current) + neighborEntry.getValue();
+
+                if (!distances.containsKey(neighbor) || newDistance < distances.get(neighbor)) {
+                    distances.put(neighbor, newDistance);
+                    pq.add(neighbor);
+                }
+            }
+        }
+
+        return distances;
+    }
+}
+
+
+//Food Distribution System:**
+
+class FoodDistributionSystem {
+    private Graph graph = new Graph();
+
+    public void addLocation(String name) {
+        graph.addLocation(name);
+    }
+
+    public void addDistance(String from, String to, int distance) {
+        graph.addDistance(from, to, distance);
+    }
+
+    public Map<String, Integer> optimizeDistribution(String source) {
+        Dijkstra dijkstra = new Dijkstra();
+        return dijkstra.findShortestPaths(graph, source);
+    }
+}
+
+
+//User Interface:**
+
+//import java.util.Map;
+//import java.util.Scanner;
+
+class UserInterface {
+    public static void main(String[] args) {
+        FoodDistributionSystem distributionSystem = new FoodDistributionSystem();
+
+// Add locations and distances (modify as per your specific scenario).
+        distributionSystem.addLocation("Donor A");
+        distributionSystem.addLocation("Donor B");
+        distributionSystem.addLocation("Distribution Center");
+        distributionSystem.addLocation("Recipient X");
+        distributionSystem.addLocation("Recipient Y");
+
+        distributionSystem.addDistance("Donor A", "Distribution Center", 10);
+        distributionSystem.addDistance("Donor B", "Distribution Center", 15);
+        distributionSystem.addDistance("Distribution Center", "Recipient X", 8);
+        distributionSystem.addDistance("Distribution Center", "Recipient Y", 12);
+
+// Get user input for the source location.
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter source location: ");
+        String source = scanner.nextLine();
+
+// Optimize distribution and display results.
+        Map<String, Integer> optimizedDistances = distributionSystem.optimizeDistribution(source);
+        System.out.println("Optimized Distribution from " + source + ":");
+        for (Map.Entry<String, Integer> entry : optimizedDistances.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue() + " km");
+        }
+    }
+}
